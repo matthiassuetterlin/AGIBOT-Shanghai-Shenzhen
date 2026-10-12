@@ -113,6 +113,21 @@
             </div>
           </div>
 
+          <div class="assistant-bar">
+            <div class="assistant-symbol" aria-hidden="true">✦</div>
+            <div class="assistant-copy">
+              <span>Grundriss-Assistent</span>
+              <input
+                id="placementCommand"
+                type="text"
+                autocomplete="off"
+                placeholder="z. B. „Produktfamilien links oben bis zum Treppenhaus und an die Fassade“"
+              />
+            </div>
+            <button class="button button-secondary" id="applyCommandButton" type="button">Im Grundriss anwenden</button>
+            <button class="button button-ghost" id="fitBayButton" type="button" disabled>Bay komplett füllen</button>
+          </div>
+
           <div class="plan-frame shape-soft" id="planFrame">
             <div class="plan-meta">
               <div>
@@ -127,16 +142,23 @@
 
             <div class="plan-stage" id="planStage">
               <img id="floorPlan" src="assets/shanghai-3f-plan.png" alt="Grundriss Shanghai, 3. Obergeschoss" draggable="false" />
+              <svg class="building-layer" id="buildingLayer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
               <svg class="route-layer" id="routeLayer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
                 <defs>
-                  <marker id="routeArrow" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto">
-                    <path d="M0,0 L5,2.5 L0,5 Z" fill="currentColor"></path>
+                  <marker id="routeArrow" markerWidth="7" markerHeight="7" refX="5.5" refY="3.5" orient="auto">
+                    <path d="M0,0 L7,3.5 L0,7 Z" fill="currentColor"></path>
                   </marker>
                 </defs>
-                <polyline id="routeLine" points="" marker-end="url(#routeArrow)"></polyline>
+                <path class="route-glow" id="routeGlow" d=""></path>
+                <path id="routeLine" d="" marker-end="url(#routeArrow)"></path>
               </svg>
               <div class="zone-layer" id="zoneLayer"></div>
-              <div class="plan-hint" id="planHint">Zonen ziehen · Ecke rechts unten zum Skalieren</div>
+              <div class="plan-legend" aria-label="Grundrisslegende">
+                <span><i class="legend-usable"></i>Planungsfläche</span>
+                <span><i class="legend-corridor"></i>Freizuhaltende Erschließung</span>
+                <span><i class="legend-core"></i>Kern / No-go</span>
+              </div>
+              <div class="plan-hint" id="planHint">Zonen in Gebäudebays ziehen · Größe und m² sind gekoppelt</div>
             </div>
           </div>
 
@@ -217,6 +239,23 @@
             <div class="insight-block">
               <p class="eyebrow">Brief-Anforderung</p>
               <p id="zoneRequirement"></p>
+            </div>
+
+            <div class="content-brief">
+              <div>
+                <p class="eyebrow">Was wird gezeigt?</p>
+                <p id="zoneExhibit"></p>
+              </div>
+              <div>
+                <p class="eyebrow">Wie wird es erklärt?</p>
+                <p id="zoneStory"></p>
+              </div>
+            </div>
+
+            <div class="geometry-readout">
+              <span>Geometrie im Grundriss</span>
+              <strong id="geometryArea">–</strong>
+              <small id="bayName">Noch keinem Planungsbay zugeordnet</small>
             </div>
 
             <button class="button button-secondary" id="duplicateZoneButton" type="button">Zone duplizieren</button>

@@ -5,8 +5,12 @@ Browser-based planning tool for the Shanghai showroom on levels 3F and 4F. It tu
 ## What is included
 
 - Separate, scaled planning canvases for Shanghai 3F and 4F
+- Digitized façade rings, building cores, stairs and protected circulation zones
+- Floor-plan bays that keep exhibits out of non-usable and core areas
 - Brief-derived zone library with area budgets and requirements
-- Drag-and-drop placement and resize handles
+- Drag-and-drop placement with automatic snapping to valid floor-plan bays
+- Bidirectional area coupling: resizing changes m² and editing m² changes geometry
+- A German placement assistant for commands such as “Produktfamilien links oben bis zum Treppenhaus und an die Fassade”
 - Editable zone names, areas, descriptions, sequence and shape language
 - Four automatic zoning studies:
   - Narrative Loop
@@ -18,7 +22,9 @@ Browser-based planning tool for the Shanghai showroom on levels 3F and 4F. It tu
   - Precise Modules
   - Organic Islands
   - Flow Capsules
-- Visitor-route overlay, overlap/flow heuristics and area accounting
+- Smooth, highlighted visitor route with automatic detours around building cores
+- Program diagrams inside each zone plus exhibit and storytelling recommendations
+- Overlap/flow heuristics and area accounting
 - Undo/redo, local autosave, JSON export/import and custom zones
 
 ## Run locally
