@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0d0d10" />
+    <meta
+      name="description"
+      content="Interaktives Zonierungs- und Besucherführungswerkzeug für den AgiBot Shanghai Showroom auf 3F und 4F."
+    />
+    <title>AgiBot Shanghai – Spatial Planner</title>
+    <link rel="icon" href="assets/favicon.svg" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <div>
+            <p class="eyebrow">AgiBot · Newbund Origin T3</p>
+            <h1>Shanghai Spatial Planner</h1>
+          </div>
+        </div>
+
+        <nav class="floor-tabs" aria-label="Geschoss auswählen">
+          <button class="floor-tab is-active" data-floor="3F" type="button">
+            <span>3F</span>
+            <small>Why AgiBot?</small>
+          </button>
+          <button class="floor-tab" data-floor="4F" type="button">
+            <span>4F</span>
+            <small>Where next?</small>
+          </button>
+        </nav>
+
+        <div class="top-actions">
+          <button class="button button-ghost" id="undoButton" type="button" title="Rückgängig">↶</button>
+          <button class="button button-ghost" id="redoButton" type="button" title="Wiederholen">↷</button>
+          <button class="button button-ghost" id="exportButton" type="button">Export</button>
+          <label class="button button-ghost file-button">
+            Import
+            <input id="importInput" type="file" accept="application/json" />
+          </label>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <aside class="panel zone-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Programm</p>
+              <h2>Zonen</h2>
+            </div>
+            <button class="icon-button" id="addZoneButton" type="button" aria-label="Neue Zone hinzufügen">+</button>
+          </div>
+
+          <div class="floor-summary">
+            <div class="summary-row">
+              <span>Brief-Fläche</span>
+              <strong id="targetArea">2.082,8 m²</strong>
+            </div>
+            <div class="area-track" aria-hidden="true">
+              <span id="areaProgress"></span>
+            </div>
+            <div class="summary-row summary-row-small">
+              <span id="plannedArea">2.082,8 m² geplant</span>
+              <span id="areaDelta">± 0,0 m²</span>
+            </div>
+          </div>
+
+          <div class="filter-row" role="group" aria-label="Zonen filtern">
+            <button class="filter-chip is-active" data-filter="all" type="button">Alle</button>
+            <button class="filter-chip" data-filter="content" type="button">Inhalt</button>
+            <button class="filter-chip" data-filter="scenario" type="button">Szenario</button>
+            <button class="filter-chip" data-filter="support" type="button">Betrieb</button>
+          </div>
+
+          <div class="zone-list" id="zoneList" aria-live="polite"></div>
+
+          <div class="source-note">
+            <span>i</span>
+            <p>Gesamtflächen folgen dem Brief. Einzelzonen sind editierbare Planungsannahmen bis zur CAD-Prüfung.</p>
+          </div>
+        </aside>
+
+        <section class="canvas-column">
+          <div class="canvas-toolbar">
+            <div class="toolbar-group">
+              <label for="layoutPreset">Auto-Zonierung</label>
+              <select id="layoutPreset">
+                <option value="narrative">Narrative Schleife</option>
+                <option value="perimeter">Perimeter-Parcours</option>
+                <option value="islands">Szenario-Inseln</option>
+                <option value="hub">Hub & Satelliten</option>
+              </select>
+              <button class="button button-accent" id="generateButton" type="button">Vorschlag zeichnen</button>
+            </div>
+            <div class="toolbar-group toolbar-group-right">
+              <label for="shapeLanguage">Formensprache</label>
+              <select id="shapeLanguage">
+                <option value="soft">Soft Tech</option>
+                <option value="orthogonal">Präzise Module</option>
+                <option value="organic">Organische Inseln</option>
+                <option value="capsule">Flow Capsules</option>
+              </select>
+              <button class="toggle is-active" id="routeToggle" type="button" aria-pressed="true">
+                <span></span> Besucherroute
+              </button>
+              <button class="toggle is-active" id="labelToggle" type="button" aria-pressed="true">
+                <span></span> Labels
+              </button>
+            </div>
+          </div>
+
+          <div class="plan-frame shape-soft" id="planFrame">
+            <div class="plan-meta">
+              <div>
+                <span id="floorBadge">3F</span>
+                <p id="floorNarrative">Warum AgiBot? · Marke, Produkte und Systemkompetenz</p>
+              </div>
+              <div class="score-card" title="Heuristik aus Überlappung, Weglänge und Sequenz">
+                <span>Flow Score</span>
+                <strong id="flowScore">82</strong>
+              </div>
+            </div>
+
+            <div class="plan-stage" id="planStage">
+              <img id="floorPlan" src="assets/shanghai-3f-plan.png" alt="Grundriss Shanghai, 3. Obergeschoss" draggable="false" />
+              <svg class="route-layer" id="routeLayer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                <defs>
+                  <marker id="routeArrow" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto">
+                    <path d="M0,0 L5,2.5 L0,5 Z" fill="currentColor"></path>
+                  </marker>
+                </defs>
+                <polyline id="routeLine" points="" marker-end="url(#routeArrow)"></polyline>
+              </svg>
+              <div class="zone-layer" id="zoneLayer"></div>
+              <div class="plan-hint" id="planHint">Zonen ziehen · Ecke rechts unten zum Skalieren</div>
+            </div>
+          </div>
+
+          <div class="statusbar">
+            <div><span class="status-dot"></span><span id="saveStatus">Lokal gespeichert</span></div>
+            <div id="layoutStatus">Narrative Schleife · 14 Zonen</div>
+          </div>
+        </section>
+
+        <aside class="panel inspector-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Auswahl</p>
+              <h2>Zone bearbeiten</h2>
+            </div>
+            <button class="icon-button icon-button-danger" id="deleteZoneButton" type="button" aria-label="Zone löschen">×</button>
+          </div>
+
+          <div id="emptyInspector" class="empty-inspector">
+            <div class="empty-icon">⌖</div>
+            <h3>Zone auswählen</h3>
+            <p>Klicke auf eine Zone im Grundriss oder in der Liste.</p>
+          </div>
+
+          <form id="zoneForm" class="zone-form is-hidden">
+            <label>
+              Name
+              <input id="zoneName" name="name" type="text" />
+            </label>
+            <div class="form-grid">
+              <label>
+                Fläche
+                <div class="input-suffix">
+                  <input id="zoneArea" name="area" type="number" min="1" step="0.1" />
+                  <span>m²</span>
+                </div>
+              </label>
+              <label>
+                Kategorie
+                <select id="zoneCategory" name="category">
+                  <option value="brand">Marke</option>
+                  <option value="product">Produkt</option>
+                  <option value="intelligence">Intelligenz</option>
+                  <option value="scenario">Szenario</option>
+                  <option value="ecosystem">Ökosystem</option>
+                  <option value="event">Event</option>
+                  <option value="outdoor">Outdoor</option>
+                  <option value="support">Betrieb</option>
+                  <option value="circulation">Flow</option>
+                </select>
+              </label>
+            </div>
+            <label>
+              Kurzbeschreibung
+              <textarea id="zoneDescription" name="description" rows="4"></textarea>
+            </label>
+            <div class="form-grid">
+              <label>
+                Sequenz
+                <input id="zoneSequence" name="sequence" type="number" min="0" step="1" />
+              </label>
+              <label>
+                Form
+                <select id="zoneShape" name="shape">
+                  <option value="inherit">Global</option>
+                  <option value="soft">Soft</option>
+                  <option value="orthogonal">Orthogonal</option>
+                  <option value="organic">Organisch</option>
+                  <option value="capsule">Capsule</option>
+                </select>
+              </label>
+            </div>
+            <label class="color-field">
+              Akzentfarbe
+              <input id="zoneColor" name="color" type="color" />
+            </label>
+
+            <div class="insight-block">
+              <p class="eyebrow">Brief-Anforderung</p>
+              <p id="zoneRequirement"></p>
+            </div>
+
+            <button class="button button-secondary" id="duplicateZoneButton" type="button">Zone duplizieren</button>
+          </form>
+
+          <div class="recommendation-card">
+            <p class="eyebrow">Planungslogik</p>
+            <h3 id="recommendationTitle">System vor Szenario</h3>
+            <p id="recommendationText">Auf 3F erst Marke und Produktlogik erklären, dann in reale Anwendungen überleiten.</p>
+          </div>
+
+          <button class="button button-reset" id="resetButton" type="button">Auf Briefing-Stand zurücksetzen</button>
+        </aside>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="app.js"></script>
+  </body>
+</html>
